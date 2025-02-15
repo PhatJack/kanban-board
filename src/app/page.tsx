@@ -51,7 +51,7 @@ export default function Home() {
             ))}
           </div>
         </header>
-        <div className="w-full flex gap-4 overflow-x-auto overflow-y-hidden">
+        <div className="w-full h-full flex gap-4 overflow-x-auto overflow-y-hidden">
           <KanbanBoard />
         </div>
       </div>

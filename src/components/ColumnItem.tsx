@@ -1,15 +1,17 @@
 import React, { useState } from "react";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
-import { EllipsisVertical, Plus } from "lucide-react";
+import { EllipsisVertical, Plus, Trash2 } from "lucide-react";
 import { generateId } from "@/lib/utils";
 import TaskItem from "./TaskItem";
 
 interface Props {
   title: string;
+  id: string;
+  removeColumn: (id: string) => void;
 }
 
-const ColumnItem = ({ title }: Props) => {
+const ColumnItem = ({ title, id, removeColumn }: Props) => {
   const [tasks, setTasks] = useState<Task[]>([]);
 
   const createTask = () => {
@@ -17,7 +19,7 @@ const ColumnItem = ({ title }: Props) => {
       ...prev,
       {
         id: generateId(),
-        title: `Task ${prev.length + 1}`,
+        title: `${title} Task ${prev.length + 1}`,
       },
     ]);
   };
@@ -35,8 +37,13 @@ const ColumnItem = ({ title }: Props) => {
             {tasks.length}
           </Badge>
         </div>
-        <Button size="icon" variant="ghost">
-          <EllipsisVertical />
+        <Button
+          type="button"
+          onClick={() => removeColumn(id)}
+          size="icon"
+          variant="destructive"
+        >
+          <Trash2 />
         </Button>
       </div>
       {/* Add Task Button */}
@@ -45,9 +52,7 @@ const ColumnItem = ({ title }: Props) => {
         <span>Add Task</span>
       </Button>
       {/* Task List */}
-      <div
-        className=" flex flex-col gap-3 flex-1 overflow-y-auto pr-1 pb-1 [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-track]:bg-blue-100 [&::-webkit-scrollbar-thumb]:bg-blue-300"
-      >
+      <div className=" flex flex-col gap-3 flex-1 overflow-y-auto pr-1 pb-1 [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-track]:bg-blue-100 [&::-webkit-scrollbar-thumb]:bg-blue-300">
         {tasks.map((task) => (
           <TaskItem key={task.id} task={task} />
         ))}
