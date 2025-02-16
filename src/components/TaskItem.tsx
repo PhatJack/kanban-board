@@ -3,14 +3,24 @@ import { Badge } from "./ui/badge";
 import { Separator } from "./ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { MessageCircleMore, Paperclip } from "lucide-react";
+import { useDraggable } from "@dnd-kit/core";
 
 interface Props {
   task: Task;
 }
 
 const TaskItem = ({ task }: Props) => {
+  const { attributes, listeners, setNodeRef } = useDraggable({
+    id: task.id,
+  });
+
   return (
-    <div className="p-2 w-full h-fit bg-white rounded-md shadow">
+    <div
+      ref={setNodeRef}
+      {...attributes}
+      {...listeners}
+      className="p-2 w-full h-fit bg-white rounded-md shadow"
+    >
       <div className="w-full flex justify-between items-center">
         <h4 className="font-semibold">{task.title}</h4>
       </div>

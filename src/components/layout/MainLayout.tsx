@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import { DndContext } from "@dnd-kit/core";
 import React from "react";
 
@@ -7,11 +7,7 @@ const MainLayout = ({
 }: Readonly<{
   children: React.ReactNode;
 }>) => {
-  return (
-    <>
-      <DndContext>{children}</DndContext>
-    </>
-  );
+  return <>{children}</>;
 };
 
 export default MainLayout;
