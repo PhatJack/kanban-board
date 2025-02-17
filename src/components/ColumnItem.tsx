@@ -1,30 +1,27 @@
-import React, { useState } from "react";
+import React, { memo, useState } from "react";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
-import { EllipsisVertical, Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2 } from "lucide-react";
 import { generateId } from "@/lib/utils";
-import TaskItem from "./TaskItem";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import TasksList from "./TasksList";
 
 interface Props {
   column: Column;
   removeColumn: (id: string) => void;
+  tasks: Task[];
+  setTasks: React.Dispatch<React.SetStateAction<Task[]>>;
+  createTask: () => void;
 }
 
-const ColumnItem = ({ column, removeColumn }: Props) => {
-  // const [tasks, setTasks] = useState<Task[]>([]);
-
-  // const createTask = () => {
-  //   setTasks((prev) => [
-  //     ...prev,
-  //     {
-  //       id: generateId(),
-  //       title: `${column?.title} Task ${prev.length + 1}`,
-  //     },
-  //   ]);
-  // };
-
+const ColumnItem = ({
+  column,
+  removeColumn,
+  tasks,
+  setTasks,
+  createTask,
+}: Props) => {
   const {
     setNodeRef,
     attributes,
@@ -40,8 +37,10 @@ const ColumnItem = ({ column, removeColumn }: Props) => {
     },
   });
 
+  // using CSS.Translate to prevent size stretched when dragging
+  // using CSS.Transform will have a good animation effect but the size will be stretched
   const style = {
-    transform: CSS.Transform.toString(transform),
+    transform: CSS.Translate.toString(transform),
     transition,
   };
 
@@ -50,52 +49,56 @@ const ColumnItem = ({ column, removeColumn }: Props) => {
       <div
         ref={setNodeRef}
         style={style}
-        className="w-[350px] h-[500px] border-2 border-blue-400 bg-blue-100 rounded-lg"
+        className={`w-[350px] min-w-[350px] h-full border-2 border-blue-400 bg-blue-100 rounded-lg antialiased`}
       ></div>
     );
   }
 
+  const DeleteButton = memo(() => {
+    return (
+      <Button
+        type="button"
+        onClick={() => removeColumn(column.id)}
+        size="icon"
+        variant="destructive"
+      >
+        <Trash2 />
+      </Button>
+    );
+  });
+
+  const BadgeTotal = memo(() => {
+    return (
+      <Badge
+        variant="outline"
+        className="rounded-full justify-center size-6 px-0.5 py-0.5"
+      >
+        {tasks.length}
+      </Badge>
+    );
+  });
+
   return (
     <div
+      id="column"
       ref={setNodeRef}
       style={style}
-      className="w-[350px] max-h-full h-[500px] min-w-[350px] flex flex-col gap-4 bg-gray-100 border border-gray-400 p-4 rounded-lg"
+      className="w-[350px] max-h-full min-w-[350px] flex flex-col gap-4 bg-gray-100 border border-gray-400 rounded-lg overflow-x-hidden relative"
     >
       {/* Header */}
       <div
         {...attributes}
         {...listeners}
-        className="w-full flex justify-between items-center p-2 border-b border-gray-400"
+        className="w-full sticky top-0 bg-gray-100 flex justify-between items-center border-b border-gray-400 p-4"
       >
         <div className="flex items-center gap-2">
           <h3 className="font-semibold">{column?.title}</h3>
-          {/* <Badge
-            variant="outline"
-            className="rounded-full justify-center size-6 px-0.5 py-0.5"
-          >
-            {tasks.length}
-          </Badge> */}
+          <BadgeTotal />
         </div>
-        <Button
-          type="button"
-          onClick={() => removeColumn(column.id)}
-          size="icon"
-          variant="destructive"
-        >
-          <Trash2 />
-        </Button>
+        <DeleteButton />
       </div>
-      {/* Add Task Button */}
-      {/* <Button type="button" onClick={createTask}>
-        <Plus />
-        <span>Add Task</span>
-      </Button> */}
       {/* Task List */}
-      {/* <div className=" flex flex-col gap-3 flex-1 overflow-y-auto pr-1 pb-1 [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-track]:bg-blue-100 [&::-webkit-scrollbar-thumb]:bg-blue-300">
-        {tasks.map((task) => (
-          <TaskItem key={task.id} task={task} />
-        ))}
-      </div> */}
+      <TasksList tasks={tasks} createTask={createTask} />
     </div>
   );
 };

@@ -3,23 +3,51 @@ import { Badge } from "./ui/badge";
 import { Separator } from "./ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { MessageCircleMore, Paperclip } from "lucide-react";
-import { useDraggable } from "@dnd-kit/core";
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
 interface Props {
   task: Task;
 }
 
 const TaskItem = ({ task }: Props) => {
-  const { attributes, listeners, setNodeRef } = useDraggable({
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    isDragging,
+    transition,
+  } = useSortable({
     id: task.id,
+    data: {
+      type: "Task",
+      task: task,
+    },
   });
 
+  const style = {
+    transform: CSS.Translate.toString(transform),
+    transition,
+  };
+
+  if (isDragging) {
+    return (
+      <li
+        style={style}
+        ref={setNodeRef}
+        className="list-none w-full rounded-md min-h-[147px] h-[147px] border-2 border-blue-400 bg-blue-100 relative"
+      ></li>
+    );
+  }
+
   return (
-    <div
-      ref={setNodeRef}
+    <li
       {...attributes}
       {...listeners}
-      className="p-2 w-full h-fit bg-white rounded-md shadow"
+      style={style}
+      ref={setNodeRef}
+      className="list-none p-2 w-full h-[147px] bg-white rounded-md shadow"
     >
       <div className="w-full flex justify-between items-center">
         <h4 className="font-semibold">{task.title}</h4>
@@ -53,7 +81,7 @@ const TaskItem = ({ task }: Props) => {
           </div>
         </div>
       </div>
-    </div>
+    </li>
   );
 };
 

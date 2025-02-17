@@ -6,4 +6,5 @@ type Column = {
 type Task = {
   id: string;
   title: string;
+	columnId: string;
 };
