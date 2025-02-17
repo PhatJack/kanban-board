@@ -73,7 +73,7 @@ const ColumnItem = ({
         variant="outline"
         className="rounded-full justify-center size-6 px-0.5 py-0.5"
       >
-        {tasks.length}
+        0
       </Badge>
     );
   });
@@ -89,7 +89,7 @@ const ColumnItem = ({
       <div
         {...attributes}
         {...listeners}
-        className="w-full sticky top-0 bg-gray-100 flex justify-between items-center border-b border-gray-400 p-4"
+        className="w-full bg-gray-100 flex justify-between items-center border-b border-gray-400 p-4"
       >
         <div className="flex items-center gap-2">
           <h3 className="font-semibold">{column?.title}</h3>

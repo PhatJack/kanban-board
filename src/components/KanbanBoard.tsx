@@ -19,7 +19,7 @@ import {
 import {
   arrayMove,
   SortableContext,
-  verticalListSortingStrategy,
+  sortableKeyboardCoordinates,
 } from "@dnd-kit/sortable";
 import { createPortal } from "react-dom";
 import TaskItem from "./TaskItem";
@@ -41,7 +41,9 @@ const KanbanBoard = () => {
   const sensors = useSensors(
     useSensor(MouseSensor),
     useSensor(TouchSensor),
-    useSensor(KeyboardSensor)
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
   );
 
   // Create a new column
@@ -75,10 +77,12 @@ const KanbanBoard = () => {
   // Remove a column
   const removeColumn = useCallback((id: string) => {
     setColumns((prev) => prev.filter((column) => column.id !== id));
+    const newTasks = tasks.filter((task) => task.columnId !== id);
+    setTasks(newTasks);
   }, []);
 
   // Handle drag start
-  const onDragStart = useCallback((event: DragStartEvent) => {
+  const onDragStart = (event: DragStartEvent) => {
     if (event.active.data.current?.type === "Column") {
       setDragColumn(event.active.data.current.column);
       return;
@@ -87,53 +91,34 @@ const KanbanBoard = () => {
       setDragTask(event.active.data.current.task);
       return;
     }
-  }, []);
+  };
 
   // Handle drag end
-  const onDragEnd = useCallback(
-    (event: DragEndEvent) => {
-      const { active, over } = event;
-      if (!over) return;
-      const activeId = active.id;
-      const overId = over.id;
+  const onDragEnd = (event: DragEndEvent) => {
+    setDragColumn(null);
+    setDragTask(null);
+    console.log(dragTask);
+    console.log(dragColumn);
+    const { active, over } = event;
+    if (!over) return;
+    const activeId = active.id;
+    const overId = over.id;
 
-      if (activeId === overId) return;
+    if (activeId === overId) return;
 
+    setColumns((prev) => {
       const activeColumnIndex = columns.findIndex(
         (column) => column.id === activeId
       );
       const overColumnIndex = columns.findIndex(
         (column) => column.id === overId
       );
-      setColumns((prev) => arrayMove(prev, activeColumnIndex, overColumnIndex));
-    },
-    [columns]
-  );
+      return arrayMove(prev, activeColumnIndex, overColumnIndex);
+    });
+  };
 
   // Handle drag over
-  // const onDragOver = useCallback((event: DragOverEvent) => {
-  //   const { active, over } = event;
-  //   if (!over) return;
-  //   const activeId = active.id;
-  //   const overId = over.id;
-
-  //   if (activeId === overId) return;
-
-  //   const isActiveTask = active.data.current?.type === "Task";
-  //   const isOverTask = over.data.current?.type === "Task";
-  //   if (isActiveTask && isOverTask) {
-  //     setTasks((prev) => {
-  //       const activeTaskIndex = prev.findIndex((task) => task.id === activeId);
-  //       const overTaskIndex = prev.findIndex((task) => task.id === overId);
-
-  //       if (prev[activeTaskIndex].columnId !== prev[overTaskIndex].columnId) {
-  //         prev[activeTaskIndex].columnId = prev[overTaskIndex].columnId;
-  //       }
-  //       return arrayMove(prev, activeTaskIndex, overTaskIndex);
-  //     });
-  //   }
-  // }, []);
-  const onDragOver = useCallback((event: DragOverEvent) => {
+  const onDragOver = (event: DragOverEvent) => {
     const { active, over } = event;
     if (!over) return;
 
@@ -144,7 +129,6 @@ const KanbanBoard = () => {
 
     const isActiveTask = active.data.current?.type === "Task";
     const isOverTask = over.data.current?.type === "Task";
-    const isOverColumn = over.data.current?.type === "Column";
 
     // Handle dragging a task over another task
     if (isActiveTask && isOverTask) {
@@ -160,15 +144,15 @@ const KanbanBoard = () => {
     }
 
     // Handle dragging a task over a column
+    const isOverColumn = over.data.current?.type === "Column";
     if (isActiveTask && isOverColumn) {
       setTasks((prev) => {
         const activeTaskIndex = prev.findIndex((task) => task.id === activeId);
-        const updatedTasks = [...prev];
-        updatedTasks[activeTaskIndex].columnId = String(overId); // Update the task's columnId
-        return arrayMove(prev, activeTaskIndex, 0);
+        prev[activeTaskIndex].columnId = String(overId);
+        return arrayMove(prev, activeTaskIndex, activeTaskIndex);
       });
     }
-  }, []);
+  };
   return (
     <div className="w-full h-full flex justify-start items-start gap-4 overflow-x-auto overflow-y-hidden">
       <DndContext
@@ -177,10 +161,7 @@ const KanbanBoard = () => {
         onDragOver={onDragOver}
         sensors={sensors}
       >
-        <SortableContext
-          items={columnIds}
-          strategy={verticalListSortingStrategy}
-        >
+        <SortableContext items={columnIds}>
           {columns.map((column) => (
             <ColumnItem
               key={column.id}
