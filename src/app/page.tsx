@@ -38,12 +38,10 @@ export default function Home() {
           <div className="w-fit flex border rounded-full border-gray-400 divide-x divide-gray-400 overflow-hidden">
             {buttons.map((button, index) => (
               <Button
-                variant={"ghost"}
+                type="button"
+                variant={button.isActive ? "default" : "ghost"}
                 key={index}
-                className={cn(
-                  "flex items-center justify-center rounded-none",
-                  button.isActive ? "bg-gray-100" : ""
-                )}
+                className={cn("flex items-center justify-center rounded-none")}
               >
                 {button.icon}
                 {button.label}
